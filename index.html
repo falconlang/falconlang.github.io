@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tensor</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <script>
+    (function(){
+      var t = localStorage.getItem('tensor-theme');
+      if (t === 'dark' || (t == null && window.matchMedia('(prefers-color-scheme: dark)').matches))
+        document.documentElement.dataset.theme = 'dark';
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <script>
+    window.falconPrint = line => console.log('[falcon]', line);
+    window.mistError = msg => console.error('[falcon error]', msg);
+
+    async function loadFalconWasm() {
+      try {
+        const go = new Go();
+        let result;
+        if (WebAssembly.instantiateStreaming) {
+          try {
+            result = await WebAssembly.instantiateStreaming(fetch('/falcon.wasm'), go.importObject);
+          } catch {}
+        }
+        if (!result) {
+          const source = await (await fetch('/falcon.wasm')).arrayBuffer();
+          result = await WebAssembly.instantiate(source, go.importObject);
+        }
+        go.run(result.instance);
+      } catch (err) {
+        console.error('[falcon-wasm] load error:', err);
+      }
+    }
+
+    const wasmScript = document.createElement('script');
+    wasmScript.src = '/wasm_exec.js';
+    wasmScript.async = true;
+    wasmScript.onload = loadFalconWasm;
+    document.head.appendChild(wasmScript);
+  </script>
+  <script type="module" crossorigin src="/assets/index-y8MPa0PL.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-D5nB9tkx.css">
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>
